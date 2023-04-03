@@ -1,6 +1,10 @@
 # idk what i'm doing, but here we go.
 name: CI
 
+permissions:
+  contents: read
+  packages: write
+
 on:
   push:
     tags:

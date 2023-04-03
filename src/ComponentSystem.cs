@@ -1,5 +1,4 @@
 using System.Reflection;
-using Anvil.API;
 using Anvil.Services;
 using NWN.Native.API;
 
@@ -18,9 +17,9 @@ public unsafe class ComponentSystem : IDisposable
 
     private readonly FunctionHook<RemovePcFromWorldHook> _removePcFromWorldHook;
 
-    internal InjectionService InjectionService { get; init; }
+    private InjectionService InjectionService { get; init; }
 
-    internal readonly List<(Assembly, WeakReference<ComponentStorage>)> componentStorages = new();
+    private readonly List<(Assembly, WeakReference<ComponentStorage>)> _componentStorages = new();
     private readonly ComponentStorage _defaultStorage;
 
     public ComponentSystem(HookService hookService, InjectionService injectionService)
@@ -43,7 +42,7 @@ public unsafe class ComponentSystem : IDisposable
         #region Storage
         
         _defaultStorage = new ComponentStorage(injectionService);
-        componentStorages.Add((null!, new WeakReference<ComponentStorage>(_defaultStorage)));
+        _componentStorages.Add((null!, new WeakReference<ComponentStorage>(_defaultStorage)));
         
         #endregion
 
@@ -77,7 +76,7 @@ public unsafe class ComponentSystem : IDisposable
     {
         var needsPurge = false;
         
-        foreach (var storage in componentStorages)
+        foreach (var storage in _componentStorages)
         {
             if (storage.Item2.TryGetTarget(out var componentStorage))
             {
@@ -91,7 +90,7 @@ public unsafe class ComponentSystem : IDisposable
         
         if (needsPurge)
         {
-            componentStorages.RemoveAll(storage => !storage.Item2.TryGetTarget(out _));
+            _componentStorages.RemoveAll(storage => !storage.Item2.TryGetTarget(out _));
         }
     }
     
@@ -100,7 +99,7 @@ public unsafe class ComponentSystem : IDisposable
         var assembly = typeof(T).Assembly;
         var needsPurge = false;
         
-        foreach (var storage in componentStorages)
+        foreach (var storage in _componentStorages)
         {
             if (storage.Item1 != assembly) continue;
             if (storage.Item2.TryGetTarget(out var componentStorage))
@@ -115,7 +114,7 @@ public unsafe class ComponentSystem : IDisposable
         
         if (needsPurge)
         {
-            componentStorages.RemoveAll(storage => !storage.Item2.TryGetTarget(out _));
+            _componentStorages.RemoveAll(storage => !storage.Item2.TryGetTarget(out _));
         }
         
         return action(_defaultStorage);
@@ -126,7 +125,7 @@ public unsafe class ComponentSystem : IDisposable
         var assembly = typeof(T).Assembly;
         var needsPurge = false;
         
-        foreach (var storage in componentStorages)
+        foreach (var storage in _componentStorages)
         {
             if (storage.Item1 != assembly) continue;
             if (storage.Item2.TryGetTarget(out var componentStorage))
@@ -141,7 +140,7 @@ public unsafe class ComponentSystem : IDisposable
         
         if (needsPurge)
         {
-            componentStorages.RemoveAll(storage => !storage.Item2.TryGetTarget(out _));
+            _componentStorages.RemoveAll(storage => !storage.Item2.TryGetTarget(out _));
         }
         
         action(_defaultStorage);
@@ -152,12 +151,11 @@ public unsafe class ComponentSystem : IDisposable
     /// or your components will go poof! The storage returned will be used to contain any components that are of the
     /// same assembly as the storage.
     /// </summary>
-    /// <typeparam name="T"></typeparam>
     /// <returns></returns>
     public ComponentStorage RegisterStorageForAssembly(Assembly assembly)
     {
         var storage = new ComponentStorage(InjectionService);
-        componentStorages.Add((assembly, new WeakReference<ComponentStorage>(storage)));
+        _componentStorages.Add((assembly, new WeakReference<ComponentStorage>(storage)));
         return storage;
     }
 

@@ -5,24 +5,16 @@ using NWN.Native.API;
 namespace Goon.ComponentSystem;
 
 [ServiceBinding(typeof(ComponentSystem))]
-public unsafe class ComponentSystem : IDisposable
+public unsafe class ComponentSystem
 {
     internal static ComponentSystem Instance { get; private set; } = null!;
-
-    private delegate void ObjectDestructorHook(void* pObject);
-
-    private readonly FunctionHook<ObjectDestructorHook> _objectDestructorHook;
-
-    private delegate void RemovePcFromWorldHook(void* pServerAppInternal, void* pPlayer);
-
-    private readonly FunctionHook<RemovePcFromWorldHook> _removePcFromWorldHook;
 
     private InjectionService InjectionService { get; init; }
 
     private readonly List<(Assembly, WeakReference<ComponentStorage>)> _componentStorages = new();
     private readonly ComponentStorage _defaultStorage;
 
-    public ComponentSystem(HookService hookService, InjectionService injectionService)
+    public ComponentSystem(InjectionService injectionService, EventService eventService)
     {
         #region Services
 
@@ -30,13 +22,11 @@ public unsafe class ComponentSystem : IDisposable
 
         #endregion
 
-        #region Hooks
-
-        _objectDestructorHook = hookService.RequestHook<ObjectDestructorHook>(OnObjectDestructor,
-            FunctionsLinux._ZN10CNWSObjectD1Ev, HookOrder.Early);
-        _removePcFromWorldHook = hookService.RequestHook<RemovePcFromWorldHook>(OnRemovePCFromWorld,
-            FunctionsLinux._ZN21CServerExoAppInternal17RemovePCFromWorldEP10CNWSPlayer, HookOrder.Early);
-
+        #region Events
+        
+        eventService.SubscribeAll<OnObjectDestroyed, OnObjectDestroyed.Factory>(OnObjectDestructor);
+        eventService.SubscribeAll<OnRemovePcFromWorldEventData, OnRemovePcFromWorldEventData.Factory>(OnRemovePCFromWorld);
+        
         #endregion
 
         #region Storage
@@ -49,27 +39,20 @@ public unsafe class ComponentSystem : IDisposable
         Instance = this;
     }
 
-    private void OnRemovePCFromWorld(void* pServerAppInternal, void* pPlayer)
+    private void OnRemovePCFromWorld(OnRemovePcFromWorldEventData evtData)
     {
-        var player = CNWSPlayer.FromPointer(pPlayer);
-        
-        PerformCleanup(storage => storage.playerFactory.Cleanup(player.m_nPlayerID));
-
-        _removePcFromWorldHook.CallOriginal(pServerAppInternal, pPlayer);
+        PerformCleanup(storage => storage.playerFactory.Cleanup(evtData.Player.m_nPlayerID));
     }
 
-    private void OnObjectDestructor(void* pObject)
+    private void OnObjectDestructor(OnObjectDestroyed evtData)
     {
-        var gameObject = CNWSObject.FromPointer(pObject);
-
+        var gameObject = evtData.Object;
         switch (gameObject.m_nObjectType)
         {
             case (byte)ObjectType.Placeable:
                 PerformCleanup(storage => storage.placeableFactory.Cleanup(gameObject.m_idSelf));
                 break;
         }
-
-        _objectDestructorHook.CallOriginal(pObject);
     }
     
     private void PerformCleanup(Action<ComponentStorage> action)
@@ -157,11 +140,5 @@ public unsafe class ComponentSystem : IDisposable
         var storage = new ComponentStorage(InjectionService);
         _componentStorages.Add((assembly, new WeakReference<ComponentStorage>(storage)));
         return storage;
-    }
-
-    public void Dispose()
-    {
-        _objectDestructorHook.Dispose();
-        _removePcFromWorldHook.Dispose();
     }
 }

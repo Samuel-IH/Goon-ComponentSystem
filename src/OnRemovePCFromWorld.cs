@@ -10,7 +10,11 @@ public class OnRemovePcFromWorldEventData: IEvent
 {
     NwObject IEvent.Context => null!;
 
-    internal CNWSPlayer Player { get; private init; } = null!;
+    /// <summary>
+    /// Nullable only because I don't know the inner workings of the game engine.
+    /// This is a safer assumption.
+    /// </summary>
+    internal CNWSPlayer? Player { get; private init; }
 
     internal sealed unsafe class Factory : HookEventFactory
     {

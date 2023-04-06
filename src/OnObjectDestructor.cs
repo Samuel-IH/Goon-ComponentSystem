@@ -10,7 +10,11 @@ internal class OnObjectDestroyed : IEvent
 {
     NwObject IEvent.Context => null!;
 
-    internal CNWSObject Object { get; private init; } = null!;
+    /// <summary>
+    /// Nullable only because I don't know the inner workings of the game engine.
+    /// This is a safer assumption.
+    /// </summary>
+    internal CNWSObject? Object { get; private init; }
     
     internal sealed unsafe class Factory : HookEventFactory
     {

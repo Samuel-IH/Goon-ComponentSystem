@@ -1,5 +1,6 @@
 using System.Reflection;
 using Anvil.API;
+using Anvil.API.Events;
 using Anvil.Services;
 using NWN.Native.API;
 
@@ -26,7 +27,7 @@ public unsafe class ComponentSystem
         #region Events
         
         eventService.SubscribeAll<OnObjectDestroyed, OnObjectDestroyed.Factory>(OnObjectDestructor);
-        eventService.SubscribeAll<OnRemovePcFromWorldEventData, OnRemovePcFromWorldEventData.Factory>(OnRemovePCFromWorld);
+        NwModule.Instance.OnClientDisconnect += OnRemovePCFromWorld;
         
         #endregion
 
@@ -40,10 +41,10 @@ public unsafe class ComponentSystem
         Instance = this;
     }
 
-    private void OnRemovePCFromWorld(OnRemovePcFromWorldEventData evtData)
+    private void OnRemovePCFromWorld(OnClientDisconnect evtData)
     {
         if (evtData.Player == null) return;
-        playerFactory.Cleanup(evtData.Player.m_nPlayerID);
+        playerFactory.Cleanup(evtData.Player.PlayerId);
     }
 
     private void OnObjectDestructor(OnObjectDestroyed evtData)

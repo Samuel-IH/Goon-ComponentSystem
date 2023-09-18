@@ -1,18 +1,17 @@
-using System.Reflection;
 using Anvil.API;
 using Anvil.API.Events;
 using Anvil.Services;
-using NWN.Native.API;
 
 namespace Goon.ComponentSystem;
 
 [ServiceBinding(typeof(ComponentSystem))]
-public unsafe class ComponentSystem
+public class ComponentSystem
 {
     internal static ComponentSystem Instance { get; private set; } = null!;
 
     private InjectionService InjectionService { get; init; }
 
+    internal readonly GenericComponentFactory<NwArea> areaFactory;
     internal readonly GenericComponentFactory<NwPlayer> playerFactory;
     internal readonly GenericComponentFactory<NwPlaceable> placeableFactory;
     
@@ -26,13 +25,15 @@ public unsafe class ComponentSystem
 
         #region Events
         
-        eventService.SubscribeAll<OnObjectDestroyed, OnObjectDestroyed.Factory>(OnObjectDestructor);
         NwModule.Instance.OnClientDisconnect += OnRemovePCFromWorld;
-        
+        eventService.SubscribeAll<OnAreaDestroyed, OnAreaDestroyed.Factory>(OnAreaDestroyed);
+        eventService.SubscribeAll<OnPlaceableDestroyed, OnPlaceableDestroyed.Factory>(OnPlaceableDestroyed);
+
         #endregion
 
         #region Factories
         
+        areaFactory = new GenericComponentFactory<NwArea>(injectionService, area => area.ObjectId);
         playerFactory = new GenericComponentFactory<NwPlayer>(injectionService, player => player.PlayerId);
         placeableFactory = new GenericComponentFactory<NwPlaceable>(injectionService, placeable => placeable.ObjectId);
         
@@ -47,15 +48,15 @@ public unsafe class ComponentSystem
         playerFactory.Cleanup(evtData.Player.PlayerId);
     }
 
-    private void OnObjectDestructor(OnObjectDestroyed evtData)
+    private void OnAreaDestroyed(OnAreaDestroyed evtData)
     {
-        if (evtData.Object is not CNWSObject gameObject) return;
-        
-        switch (gameObject.m_nObjectType)
-        {
-            case (byte)ObjectType.Placeable:
-                placeableFactory.Cleanup(gameObject.m_idSelf);
-                break;
-        }
+        if (evtData.Area == null) return;
+        areaFactory.Cleanup(evtData.Area.m_idSelf);
+    }
+    
+    private void OnPlaceableDestroyed(OnPlaceableDestroyed evtData)
+    {
+        if (evtData.Placeable == null) return;
+        placeableFactory.Cleanup(evtData.Placeable.m_idSelf);
     }
 }

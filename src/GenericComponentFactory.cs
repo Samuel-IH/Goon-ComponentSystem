@@ -82,7 +82,12 @@ namespace Goon.ComponentSystem;
 
             if (destroyableComponents.Remove(component))
             {
-                component._OnDestroy();
+                NwTask.Run(() =>
+                {
+                    component._OnDestroy();
+                    component.cancellationTokenSource.Cancel();
+                    return Task.CompletedTask;
+                });
             }
         }
     }

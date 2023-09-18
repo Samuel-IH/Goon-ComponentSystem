@@ -63,6 +63,60 @@ public abstract class Component<T>
         }
     }
     
+    public async void StartTask<T1>(Func<T1, CancellableDelays, Task> task, T1 arg1)
+    {
+        try
+        {
+            await task(arg1, _cancellableDelays);
+        }
+        catch (TaskCanceledException) { }
+    }
+    
+    public async void StartTask<T1, T2>(Func<T1, T2, CancellableDelays, Task> task, T1 arg1, T2 arg2)
+    {
+        try
+        {
+            await task(arg1, arg2, _cancellableDelays);
+        }
+        catch (TaskCanceledException) { }
+    }
+    
+    public async void StartTask<T1, T2, T3>(Func<T1, T2, T3, CancellableDelays, Task> task, T1 arg1, T2 arg2, T3 arg3)
+    {
+        try
+        {
+            await task(arg1, arg2, arg3, _cancellableDelays);
+        }
+        catch (TaskCanceledException) { }
+    }
+    
+    public async void StartTask<T1, T2, T3, T4>(Func<T1, T2, T3, T4, CancellableDelays, Task> task, T1 arg1, T2 arg2, T3 arg3, T4 arg4)
+    {
+        try
+        {
+            await task(arg1, arg2, arg3, arg4, _cancellableDelays);
+        }
+        catch (TaskCanceledException) { }
+    }
+    
+    public async void StartTask<T1, T2, T3, T4, T5>(Func<T1, T2, T3, T4, T5, CancellableDelays, Task> task, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5)
+    {
+        try
+        {
+            await task(arg1, arg2, arg3, arg4, arg5, _cancellableDelays);
+        }
+        catch (TaskCanceledException) { }
+    }
+    
+    public async void StartTask<T1, T2, T3, T4, T5, T6>(Func<T1, T2, T3, T4, T5, T6, CancellableDelays, Task> task, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6)
+    {
+        try
+        {
+            await task(arg1, arg2, arg3, arg4, arg5, arg6, _cancellableDelays);
+        }
+        catch (TaskCanceledException) { }
+    }
+    
     #endregion
 
     #region Lifecycle

@@ -9,7 +9,7 @@
         <RootNamespace>Goon.ComponentSystem</RootNamespace>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <Version>35.1.0</Version>
+        <Version>35.1.1-dev-1</Version>
         <PackageProjectUrl>https://github.com/Samuel-IH/Goon-ComponentSystem</PackageProjectUrl>
         <PackageLicenseUrl>https://raw.githubusercontent.com/Samuel-IH/Goon-ComponentSystem/master/LICENSE</PackageLicenseUrl>
         <RepositoryUrl>https://github.com/Samuel-IH/Goon-ComponentSystem</RepositoryUrl>

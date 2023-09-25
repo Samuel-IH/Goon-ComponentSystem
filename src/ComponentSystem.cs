@@ -14,6 +14,7 @@ public class ComponentSystem
     internal readonly GenericComponentFactory<NwArea> areaFactory;
     internal readonly GenericComponentFactory<NwPlayer> playerFactory;
     internal readonly GenericComponentFactory<NwPlaceable> placeableFactory;
+    internal readonly GenericComponentFactory<NwCreature> creatureFactory;
     
     public ComponentSystem(InjectionService injectionService, EventService eventService)
     {
@@ -28,6 +29,7 @@ public class ComponentSystem
         NwModule.Instance.OnClientDisconnect += OnRemovePCFromWorld;
         eventService.SubscribeAll<OnAreaDestroyed, OnAreaDestroyed.Factory>(OnAreaDestroyed);
         eventService.SubscribeAll<OnPlaceableDestroyed, OnPlaceableDestroyed.Factory>(OnPlaceableDestroyed);
+        eventService.SubscribeAll<OnCreatureDestroyed, OnCreatureDestroyed.Factory>(OnCreatureDestroyed);
 
         #endregion
 
@@ -36,6 +38,7 @@ public class ComponentSystem
         areaFactory = new GenericComponentFactory<NwArea>(injectionService, area => area.ObjectId);
         playerFactory = new GenericComponentFactory<NwPlayer>(injectionService, player => player.PlayerId);
         placeableFactory = new GenericComponentFactory<NwPlaceable>(injectionService, placeable => placeable.ObjectId);
+        creatureFactory = new GenericComponentFactory<NwCreature>(injectionService, creature => creature.ObjectId);
         
         #endregion
 
@@ -58,5 +61,11 @@ public class ComponentSystem
     {
         if (evtData.Placeable == null) return;
         placeableFactory.Cleanup(evtData.Placeable.m_idSelf);
+    }
+    
+    private void OnCreatureDestroyed(OnCreatureDestroyed evtData)
+    {
+        if (evtData.Creature == null) return;
+        creatureFactory.Cleanup(evtData.Creature.m_idSelf);
     }
 }

@@ -21,10 +21,11 @@ namespace Goon.ComponentSystem;
 
             foreach (var component in destroyableComponents)
             {
+                var comp = component;
                 NwTask.Run(() =>
                 {
-                    component._OnDestroy();
-                    component.cancellationTokenSource.Cancel();
+                    comp._OnDestroy();
+                    comp.cancellationTokenSource.Cancel();
                     return Task.CompletedTask;
                 });
             }

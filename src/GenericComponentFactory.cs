@@ -21,13 +21,8 @@ namespace Goon.ComponentSystem;
 
             foreach (var component in destroyableComponents)
             {
-                var comp = component;
-                NwTask.Run(() =>
-                {
-                    comp._OnDestroy();
-                    comp.cancellationTokenSource.Cancel();
-                    return Task.CompletedTask;
-                });
+                component._OnDestroy();
+                component.cancellationTokenSource.Cancel();
             }
 
             _entityMap.Remove(nativeId);
@@ -81,15 +76,9 @@ namespace Goon.ComponentSystem;
         {
             if (!_entityMap.TryGetValue(_getNativeId(entity), out var destroyableComponents)) return;
 
-            if (destroyableComponents.Remove(component))
-            {
-                NwTask.Run(() =>
-                {
-                    component._OnDestroy();
-                    component.cancellationTokenSource.Cancel();
-                    return Task.CompletedTask;
-                });
-            }
+            if (!destroyableComponents.Remove(component)) return;
+            component._OnDestroy();
+            component.cancellationTokenSource.Cancel();
         }
     }
     

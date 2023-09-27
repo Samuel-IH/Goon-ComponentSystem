@@ -1,4 +1,5 @@
 using Anvil.API;
+using Action = System.Action;
 
 namespace Goon.ComponentSystem;
 
@@ -119,10 +120,72 @@ public abstract class Component<T>
     
     #endregion
 
+    #region Listeners
+
+    /// <summary>
+    /// Stores a reference to a listener and a means to remove it.
+    /// You can clean up the listener by calling DeregisterListener on the component that owns it.
+    /// </summary>
+    protected class RegisteredListener
+    {
+        public RegisteredListener(Action cleanup)
+        {
+            Cleanup = cleanup;
+        }
+
+        private Action Cleanup { get; init; }
+        internal void Deregister()
+        {
+            Cleanup();
+        }
+    }
+
+    private List<RegisteredListener>? _registeredListeners;
+    
+    /// <summary>
+    /// Registers a listener and keeps track of a means to remove it.
+    /// Automatically cleans up the listener when this component is destroyed.
+    /// </summary>
+    /// <param name="add">Action used to add the listener (eg. <code>() =&gt; myCreature.OnAcquireItem += Foo;</code>)</param>
+    /// <param name="remove">Action used to remove the listener (eg. <code>() =&gt; myCreature.OnAcquireItem -= Foo;</code>)</param>
+    /// <returns>A <see cref="RegisteredListener"/>, which will can also be manually cleaned up by calling <see cref="DeregisterListener"/></returns>
+    protected RegisteredListener RegisterListener(Action add, Action remove)
+    {
+        var rl = new RegisteredListener(remove);
+        add();
+        (_registeredListeners ??= new List<RegisteredListener>()).Add(rl);
+        return rl;
+    }
+    
+    /// <summary>
+    /// De-registers a listener that was registered with <see cref="RegisterListener"/>.
+    /// Listeners that are deregistered here will *not* be deregistered when this component is destroyed.
+    /// </summary>
+    /// <param name="rl">The listener, to deregister.</param>
+    protected void DeregisterListener(RegisteredListener rl)
+    {
+        rl.Deregister();
+        _registeredListeners?.Remove(rl);
+    }
+
+    #endregion
+    
     #region Lifecycle
 
     internal void _OnAwake() => OnAwake();
-    internal void _OnDestroy() => OnDestroy();
+
+    internal void _OnDestroy()
+    {
+        if (_registeredListeners != null)
+        {
+            foreach (var registeredListener in _registeredListeners)
+            {
+                registeredListener.Deregister();
+            }
+        }
+        
+        OnDestroy();
+    }
 
     /// <summary>
     /// This is called immediately after the component is attached to an entity.

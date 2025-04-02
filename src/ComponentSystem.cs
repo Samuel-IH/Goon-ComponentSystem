@@ -7,7 +7,7 @@ namespace Goon.ComponentSystem;
 [ServiceBinding(typeof(ComponentSystem))]
 public class ComponentSystem
 {
-    internal static ComponentSystem Instance { get; private set; } = null!;
+    internal static ComponentSystem Instance => ComponentSystemPluginFinder.ComponentSystem;
 
     private InjectionService InjectionService { get; init; }
 
@@ -42,7 +42,7 @@ public class ComponentSystem
         
         #endregion
 
-        Instance = this;
+        ComponentSystemPluginFinder.Register(this);
     }
 
     private void OnRemovePCFromWorld(OnClientDisconnect evtData)

@@ -8,8 +8,11 @@
         <AssemblyName>SamuelIH.Nwn.ComponentSystem</AssemblyName>
         <RootNamespace>Goon.ComponentSystem</RootNamespace>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <Version>37.1.0</Version>
+
+        <!-- GeneratePackageOnBuild is optional now since we use dotnet pack explicitly -->
+        <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+
+        <!-- Package metadata stays -->
         <PackageProjectUrl>https://github.com/Samuel-IH/Goon-ComponentSystem</PackageProjectUrl>
         <PackageLicenseUrl>https://raw.githubusercontent.com/Samuel-IH/Goon-ComponentSystem/master/LICENSE</PackageLicenseUrl>
         <RepositoryUrl>https://github.com/Samuel-IH/Goon-ComponentSystem</RepositoryUrl>
@@ -20,12 +23,12 @@
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-      <PlatformTarget>x64</PlatformTarget>
-      <DocumentationFile>bin\Release\net6.0\Goon.ComponentSystem.xml</DocumentationFile>
+        <PlatformTarget>x64</PlatformTarget>
+        <DocumentationFile>bin\Release\net8.0\Goon.ComponentSystem.xml</DocumentationFile>
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="NWN.Anvil" Version="8193.37.0" />
-      <PackageReference Include="NWN.Native" Version="8193.37.3" />
+        <PackageReference Include="NWN.Anvil" Version="8193.37.0"/>
+        <PackageReference Include="NWN.Native" Version="8193.37.3"/>
     </ItemGroup>
 </Project>

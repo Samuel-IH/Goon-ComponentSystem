@@ -14,7 +14,7 @@ internal class OnObjectDestroyed : IEvent
     
     internal sealed unsafe class Factory : HookEventFactory
     {
-        [NativeFunction("_ZN13CNWSObjectD2Ev", "")]
+        [NativeFunction("_ZN10CNWSObjectD2Ev", "")]
         private delegate void OnDestructor(void* pObject);
 
         private static FunctionHook<OnDestructor> ObjectDestructorHook { get; set; } = null!;

@@ -15,6 +15,7 @@ public class ComponentSystem
     internal readonly GenericComponentFactory<NwPlayer> playerFactory;
     internal readonly GenericComponentFactory<NwPlaceable> placeableFactory;
     internal readonly GenericComponentFactory<NwCreature> creatureFactory;
+    internal readonly GenericComponentFactory<NwGameObject> gameObjectFactory;
     
     public ComponentSystem(InjectionService injectionService, EventService eventService)
     {
@@ -30,6 +31,7 @@ public class ComponentSystem
         eventService.SubscribeAll<OnAreaDestroyed, OnAreaDestroyed.Factory>(OnAreaDestroyed);
         eventService.SubscribeAll<OnPlaceableDestroyed, OnPlaceableDestroyed.Factory>(OnPlaceableDestroyed);
         eventService.SubscribeAll<OnCreatureDestroyed, OnCreatureDestroyed.Factory>(OnCreatureDestroyed);
+        eventService.SubscribeAll<OnObjectDestroyed, OnObjectDestroyed.Factory>(OnGameObjectDestroyed);
 
         #endregion
 
@@ -67,5 +69,11 @@ public class ComponentSystem
     {
         if (evtData.Creature == null) return;
         creatureFactory.Cleanup(evtData.Creature.m_idSelf);
+    }
+    
+    private void OnGameObjectDestroyed(OnObjectDestroyed evtData)
+    {
+        if (evtData.Obj == null) return;
+        gameObjectFactory.Cleanup(evtData.Obj.m_idSelf);
     }
 }

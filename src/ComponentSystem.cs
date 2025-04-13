@@ -41,6 +41,7 @@ public class ComponentSystem
         playerFactory = new GenericComponentFactory<NwPlayer>(injectionService, player => player.PlayerId);
         placeableFactory = new GenericComponentFactory<NwPlaceable>(injectionService, placeable => placeable.ObjectId);
         creatureFactory = new GenericComponentFactory<NwCreature>(injectionService, creature => creature.ObjectId);
+        gameObjectFactory = new GenericComponentFactory<NwGameObject>(injectionService, gameObject => gameObject.ObjectId);
         
         #endregion
 

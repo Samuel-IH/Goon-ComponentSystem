@@ -1,53 +1,49 @@
-# idk what i'm doing, but here we go.
-name: CI
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'  # Only trigger on tags like v1.2.3
+  workflow_dispatch:  # Manual run support
 
 permissions:
   contents: read
   packages: write
 
-on:
-  push:
-    tags:
-    - '*'
-  workflow_dispatch:
-
 jobs:
-  build: # does the name here matter?
-  
-    # seems reasonable enough
+  release:
+    runs-on: ubuntu-latest
     env:
       BUILD_CONFIG: "Release"
       SOLUTION: "GCS.sln"
-    
-    runs-on: ubuntu-latest
-    
+
     steps:
-    - uses: actions/checkout@v2
-
-    - name: Setup NuGet
-      uses: NuGet/setup-nuget@v1.0.5
-
-    - name: Restore dependencies
-      run: nuget restore $SOLUTION
+    - uses: actions/checkout@v4
 
     - name: Setup .NET
-      uses: actions/setup-dotnet@v1
+      uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: 7.0.x
+        dotnet-version: 8.0.x
+
+    - name: Extract version from tag
+      run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
+
+    - name: Restore
+      run: dotnet restore $SOLUTION
 
     - name: Build
       run: dotnet build $SOLUTION --configuration $BUILD_CONFIG --no-restore
 
-    - name: Log in to the Container registry
-      uses: docker/login-action@v2
-      with:
-        registry: ghcr.io
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
-    
-    - name: Publish NuGet package (Github)
-      run: dotnet nuget push ./bin/Release/*.nupkg --source https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json --api-key ${{ secrets.GITHUB_TOKEN }}
+    - name: Pack
+      run: dotnet pack $SOLUTION --configuration $BUILD_CONFIG --no-build -p:PackageVersion=${VERSION}
+
+    - name: Push to NuGet.org
+      run: dotnet nuget push ./bin/Release/*.nupkg --api-key ${{ secrets.NUGET_KEY }} --source https://api.nuget.org/v3/index.json
       env:
         DOTNET_CLI_NO_PROMPT: true
-    - name: Publish NuGet package (NuGet)
-      run: dotnet nuget push ./bin/Release/*.nupkg --api-key ${{ secrets.NUGET_KEY }} --source https://api.nuget.org/v3/index.json
+
+    - name: Upload Package Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: nuget-packages
+        path: ./bin/Release/*.nupkg

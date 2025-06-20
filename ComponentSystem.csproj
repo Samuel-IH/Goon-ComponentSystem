@@ -10,7 +10,7 @@
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 
         <!-- GeneratePackageOnBuild is optional now since we use dotnet pack explicitly -->
-        <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 
         <!-- Package metadata stays -->
         <PackageProjectUrl>https://github.com/Samuel-IH/Goon-ComponentSystem</PackageProjectUrl>
@@ -20,6 +20,7 @@
         <PackageId>SamuelIH.Nwn.ComponentSystem</PackageId>
         <Description>Component system for NWN:EE Built on Anvil.</Description>
         <Copyright>MIT</Copyright>
+        <Version>37.2.0</Version>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
@@ -28,7 +29,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="NWN.Anvil" Version="8193.37.0"/>
+        <PackageReference Include="NWN.Anvil" Version="8193.37.2" />
         <PackageReference Include="NWN.Native" Version="8193.37.3"/>
     </ItemGroup>
 </Project>

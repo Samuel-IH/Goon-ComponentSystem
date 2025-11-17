@@ -20,7 +20,7 @@
         <PackageId>SamuelIH.Nwn.ComponentSystem</PackageId>
         <Description>Component system for NWN:EE Built on Anvil.</Description>
         <Copyright>MIT</Copyright>
-        <Version>37.2.0</Version>
+        <Version>37.3.0</Version>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
@@ -29,7 +29,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="NWN.Anvil" Version="8193.37.2" />
-        <PackageReference Include="NWN.Native" Version="8193.37.3"/>
+        <PackageReference Include="NWN.Anvil" Version="8193.37.3" />
+        <PackageReference Include="NWN.Native" Version="8193.37.4" />
     </ItemGroup>
 </Project>
